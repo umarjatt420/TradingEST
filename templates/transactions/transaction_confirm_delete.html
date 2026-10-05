@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Delete transaction · {{ brand_name_en }}{% endblock %}
+{% block header_title %}Delete transaction{% endblock %}
+
+{% block content %}
+<div class="te-page-card mx-auto" style="max-width: 520px;">
+  <h2 class="h5 mb-3">Delete this transaction?</h2>
+  <p class="text-muted">{{ object.date }} — {{ object.description }} ({{ object.amount_excl_vat|sar }})</p>
+  <form method="post" class="d-flex flex-wrap gap-2 mt-4">
+    {% csrf_token %}
+    <button type="submit" class="btn te-btn-danger">Delete</button>
+    <a class="btn te-btn-secondary" href="{% url 'transactions:detail' object.pk %}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

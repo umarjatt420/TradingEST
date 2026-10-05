@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block title %}Transactions · {{ brand_name_en }}{% endblock %}
+{% block header_title %}Transactions{% endblock %}
+
+{% block content %}
+<div class="te-page-heading-row flex-column flex-sm-row align-items-stretch align-items-sm-center">
+  <h1>Transactions</h1>
+  {% if user.role == 'admin' or user.role == 'accountant' %}
+  <a class="btn te-btn-gradient w-100 w-sm-auto" href="{% url 'transactions:add' %}"><i class="bi bi-plus-lg me-1"></i> New transaction</a>
+  {% endif %}
+</div>
+
+<form method="get" class="row g-2 align-items-end mb-4 te-toolbar te-toolbar--filters">
+  <div class="col-12 col-md-3">
+    <label class="form-label small text-muted mb-1 fw-semibold">Date</label>
+    <input class="form-control" type="date" name="date" value="{{ filters.date }}">
+  </div>
+  <div class="col-12 col-md-2">
+    <label class="form-label small text-muted mb-1 fw-semibold">Type (IN/OUT)</label>
+    <select class="form-select" name="flow_type">
+      <option value="">All</option>
+      <option value="IN" {% if filters.flow_type == 'IN' %}selected{% endif %}>IN</option>
+      <option value="OUT" {% if filters.flow_type == 'OUT' %}selected{% endif %}>OUT</option>
+    </select>
+  </div>
+  <div class="col-12 col-md-3">
+    <label class="form-label small text-muted mb-1 fw-semibold">Category</label>
+    <select class="form-select" name="category">
+      <option value="">All Categories</option>
+      {% for cat in categories %}
+      <option value="{{ cat }}" {% if filters.category == cat %}selected{% endif %}>{{ cat }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-6 col-md-2">
+    <button class="btn te-btn-secondary w-100 mt-md-4" type="submit"><i class="bi bi-funnel me-1"></i> Filter</button>
+  </div>
+  <div class="col-6 col-md-2">
+    <button class="btn btn-success w-100 mt-md-4" type="submit" name="export" value="excel"><i class="bi bi-file-earmark-excel me-1"></i> Export</button>
+  </div>
+</form>
+
+<p class="small mb-3" style="color: var(--te-muted);">
+  {% if filters_active %}<strong style="color: var(--te-text);">Filtered total:</strong>{% else %}Ledger totals (all rows):{% endif %}
+  {{ ledger_totals.total_lines }} lines ·
+  Sum excl. VAT {{ ledger_totals.sum_excl|sar }} · Sum total amount {{ ledger_totals.sum_total|sar }}
+</p>
+{% if account_breakdown %}
+<details class="mb-3 te-page-card p-3"><summary class="small" style="color: var(--te-muted);">By account (values + annotate)</summary>
+  <div class="table-responsive mt-2">
+    <table class="table table-sm mb-0" style="max-width: 420px;">
+      <thead><tr><th>Account</th><th>Lines</th><th>Sum excl.</th></tr></thead>
+      <tbody>
+        {% for row in account_breakdown %}
+        <tr><td>{{ row.account }}</td><td>{{ row.lines }}</td><td>{{ row.sum_excl|sar }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</details>
+{% endif %}
+
+{% if transactions %}
+{# xs only: card list #}
+<div class="d-block d-sm-none te-tx-cards">
+  {% for t in transactions %}
+  <div class="card mb-3 te-tx-card">
+    <div class="card-body">
+      <div class="te-tx-card__top">
+        <div>
+          <div class="small text-muted">{% if t.project %}<code>{{ t.project.reference_number }}</code> · {% endif %}{{ t.date }}</div>
+          <div class="mt-1">{% include "partials/flow_badge.html" with flow=t.flow_type %}</div>
+        </div>
+        {% include "partials/payment_badge.html" with status=t.payment_status %}
+      </div>
+      <div class="te-tx-card__amount">{{ t.total_amount|default:t.amount_excl_vat|sar }}</div>
+      <p class="small mb-1"><strong>{{ labels.amount_excl_vat }}</strong> {{ t.amount_excl_vat|sar }} · <strong>{{ labels.tax_amount }}</strong> {{ t.tax_amount|sar }}</p>
+      <p class="small mb-1"><strong>{{ labels.account }}</strong> {{ t.account }}</p>
+      <p class="small mb-1"><strong>{{ labels.category }}</strong> {{ t.category }}</p>
+      {% if t.party_name %}<p class="small mb-1"><strong>{{ labels.party_name }}</strong> {{ t.party_name }}</p>{% endif %}
+      {% if t.project %}<p class="small mb-0"><strong>{{ labels.project }}</strong> {{ t.project.name }}</p>{% endif %}
+      <div class="te-tx-card__actions">
+        <a class="btn te-btn-secondary" href="{% url 'transactions:detail' t.pk %}">View</a>
+        {% if user.role == 'admin' or user.role == 'accountant' %}
+        <a class="btn te-btn-gradient" href="{% url 'transactions:edit' t.pk %}">Edit</a>
+        <a class="btn te-btn-danger" href="{% url 'transactions:delete' t.pk %}">Delete</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{# sm+: table #}
+<div class="te-table-card d-none d-sm-block">
+  <div class="table-responsive">
+    <table class="table table-sm mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>{{ labels.project_reference }}</th>
+          <th>{{ labels.date }}</th>
+          <th>{{ labels.flow_type }}</th>
+          <th>{{ labels.payment_status }}</th>
+          <th>{{ labels.amount_excl_vat }}</th>
+          <th>{{ labels.tax_amount }}</th>
+          <th>{{ labels.total_amount }}</th>
+          <th>{{ labels.account }}</th>
+          <th>{{ labels.category }}</th>
+          <th>{{ labels.project }}</th>
+          <th>{{ labels.party_name }}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in transactions %}
+        <tr>
+          <td>{% if t.project %}<code class="small">{{ t.project.reference_number }}</code>{% else %}—{% endif %}</td>
+          <td>{{ t.date }}</td>
+          <td>{% include "partials/flow_badge.html" with flow=t.flow_type %}</td>
+          <td>{% include "partials/payment_badge.html" with status=t.payment_status %}</td>
+          <td>{{ t.amount_excl_vat|sar }}</td>
+          <td>{{ t.tax_amount|sar }}</td>
+          <td>{{ t.total_amount|sar }}</td>
+          <td>{{ t.account }}</td>
+          <td>{{ t.category }}</td>
+          <td>{% if t.project %}{{ t.project.name }}{% endif %}</td>
+          <td>{{ t.party_name }}</td>
+          <td class="text-nowrap">
+            <a class="btn btn-sm te-btn-secondary" href="{% url 'transactions:detail' t.pk %}">View</a>
+            {% if user.role == 'admin' or user.role == 'accountant' %}
+            <a class="btn btn-sm te-btn-gradient" href="{% url 'transactions:edit' t.pk %}">Edit</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="te-page-card te-empty-state">
+  <i class="bi bi-journal-x" aria-hidden="true"></i>
+  <p>No transactions match your filters.</p>
+</div>
+{% endif %}
+
+{% if is_paginated %}
+<nav class="mt-3"><ul class="pagination mb-0 flex-wrap">
+  {% if page_obj.has_previous %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>{% endif %}
+  {% if page_obj.has_next %}<li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>{% endif %}
+</ul></nav>
+{% endif %}
+{% endblock %}

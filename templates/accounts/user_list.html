@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Users · {{ brand_name_en }}{% endblock %}
+{% block header_title %}Users{% endblock %}
+
+{% block content %}
+<div class="te-page-heading-row">
+  <h1>Users</h1>
+  <a class="btn te-btn-gradient" href="{% url 'accounts:user_add' %}"><i class="bi bi-plus-lg me-1"></i> Add user</a>
+</div>
+
+{% if users %}
+<div class="te-table-card">
+  <div class="table-responsive">
+    <table class="table mb-0 align-middle">
+      <thead><tr><th>Email</th><th>Name</th><th>Role</th><th>Active</th><th></th></tr></thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td class="fw-medium">{{ u.email }}</td>
+          <td>{{ u.full_name|default:"—" }}</td>
+          <td>
+            {% if u.role == 'admin' %}
+            <span class="badge rounded-pill badge-role-admin">{{ u.get_role_display }}</span>
+            {% elif u.role == 'accountant' %}
+            <span class="badge rounded-pill badge-role-accountant">{{ u.get_role_display }}</span>
+            {% else %}
+            <span class="badge rounded-pill badge-role-viewer">{{ u.get_role_display }}</span>
+            {% endif %}
+          </td>
+          <td>{% if u.is_active %}<span class="text-success"><i class="bi bi-check-circle me-1"></i>Yes</span>{% else %}<span class="text-muted">No</span>{% endif %}</td>
+          <td><a class="btn btn-sm te-btn-secondary" href="{% url 'accounts:user_edit' u.pk %}">Edit</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="te-page-card te-empty-state">
+  <i class="bi bi-person-x" aria-hidden="true"></i>
+  <p>No users yet.</p>
+</div>
+{% endif %}
+{% endblock %}

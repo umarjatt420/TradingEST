@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+{% block title %}Tax report · {{ brand_name_en }}{% endblock %}
+{% block header_title %}Tax report{% endblock %}
+
+{% block content %}
+<form method="get" class="te-toolbar te-tax-filter" id="teTaxReportForm">
+  <div class="row g-4">
+    <div class="col-12 col-lg-5">
+      <div class="te-tax-filter__section">
+        <div class="te-tax-filter__label">
+          <i class="bi bi-calendar-event" aria-hidden="true"></i>
+          Report ends on
+        </div>
+        <div class="te-tax-date-group">
+          <select class="form-select" name="month" id="teTaxMonth" aria-label="End month">
+            {% for num, name in calendar_months %}
+            <option value="{{ num }}" {% if month == num %}selected{% endif %}>{{ name }}</option>
+            {% endfor %}
+          </select>
+          <select class="form-select" name="year" id="teTaxYear" aria-label="End year">
+            {% for y in year_choices %}
+            <option value="{{ y }}" {% if year == y %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <div class="te-tax-filter__section">
+        <div class="te-tax-filter__label">
+          <i class="bi bi-hourglass-split" aria-hidden="true"></i>
+          How many months?
+        </div>
+        <div class="te-tax-period-pills" role="group" aria-label="Report period length">
+          {% for n, label, hint in period_options %}
+          <div>
+            <input type="radio" name="months" id="tePeriod{{ n }}" value="{{ n }}" {% if months == n %}checked{% endif %}>
+            <label class="te-tax-period-pill" for="tePeriod{{ n }}">
+              <strong>{{ label }}</strong>
+              <small>{{ hint }}</small>
+            </label>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-lg-7">
+      <div class="te-tax-filter__section h-100 d-flex flex-column">
+        <div class="te-tax-filter__label">
+          <i class="bi bi-eye" aria-hidden="true"></i>
+          Preview
+        </div>
+        <div class="te-tax-preview flex-grow-1" id="teTaxPreview" aria-live="polite">
+          <div class="te-tax-preview__title">Months included in this report</div>
+          <div class="te-tax-preview__range" id="teTaxPreviewRange"></div>
+          <div class="te-tax-preview__chips" id="teTaxPreviewChips"></div>
+        </div>
+        <div class="te-tax-filter__actions mt-3 d-flex gap-2">
+          <button type="submit" class="btn te-btn-gradient">
+            <i class="bi bi-play-fill me-1" aria-hidden="true"></i>
+            Generate Report
+          </button>
+          <button type="submit" name="export" value="excel" class="btn btn-success te-btn-success">
+            <i class="bi bi-file-earmark-excel me-1" aria-hidden="true"></i>
+            Export
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+<div class="te-page-heading-row mb-3">
+  <div>
+    <h1 class="h5 mb-1">VAT summary</h1>
+    <p class="text-muted small mb-0">{{ report.period_label }} · {{ report.months_count }} month{{ report.months_count|pluralize }}</p>
+  </div>
+</div>
+
+<div class="te-table-card te-page-card--flush">
+  <div class="table-responsive">
+    <table class="table table-sm mb-0 align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Month</th>
+          <th class="text-end">Total Sales (Excl. VAT)</th>
+          <th class="text-end">Output VAT 15%</th>
+          <th class="text-end">Total Purchases (Excl. VAT)</th>
+          <th class="text-end">Input VAT 15%</th>
+          <th class="text-end">Net VAT Payable</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in report.rows %}
+        <tr>
+          <td class="fw-medium">{{ row.month_name }}</td>
+          <td class="text-end">{{ row.total_sales_excl_vat|sar }}</td>
+          <td class="text-end">{{ row.output_vat|sar }}</td>
+          <td class="text-end">{{ row.total_purchases_excl_vat|sar }}</td>
+          <td class="text-end">{{ row.input_vat|sar }}</td>
+          <td class="text-end">{{ row.net_vat_payable|sar }}</td>
+        </tr>
+        {% endfor %}
+        <tr class="te-row-emphasis">
+          <td class="fw-bold">Total</td>
+          <td class="text-end fw-bold">{{ report.totals.total_sales_excl_vat|sar }}</td>
+          <td class="text-end fw-bold">{{ report.totals.output_vat|sar }}</td>
+          <td class="text-end fw-bold">{{ report.totals.total_purchases_excl_vat|sar }}</td>
+          <td class="text-end fw-bold">{{ report.totals.input_vat|sar }}</td>
+          <td class="text-end fw-bold">{{ report.totals.net_vat_payable|sar }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<p class="text-muted small mt-3 mb-0">Paid client sales (IN) and cash purchases (OUT) with <strong>Tax %</strong> or <strong>Tax Amount</strong> &gt; 0. <strong>Total Purchases</strong> does not include lines with no VAT (e.g. salary at 0%).</p>
+
+<script>
+(function () {
+  const MONTH_NAMES = [
+    "", "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+
+  function monthsInPeriod(endYear, endMonth, count) {
+    const out = [];
+    let y = endYear;
+    let m = endMonth;
+    for (let i = 0; i < count; i++) {
+      out.push({ y, m });
+      m -= 1;
+      if (m < 1) {
+        m = 12;
+        y -= 1;
+      }
+    }
+    out.reverse();
+    return out;
+  }
+
+  function label(y, m) {
+    return MONTH_NAMES[m] + " " + y;
+  }
+
+  function updatePreview() {
+    const monthEl = document.getElementById("teTaxMonth");
+    const yearEl = document.getElementById("teTaxYear");
+    const periodEl = document.querySelector('#teTaxReportForm input[name="months"]:checked');
+    const rangeEl = document.getElementById("teTaxPreviewRange");
+    const chipsEl = document.getElementById("teTaxPreviewChips");
+    if (!monthEl || !yearEl || !periodEl || !rangeEl || !chipsEl) return;
+
+    const endMonth = parseInt(monthEl.value, 10);
+    const endYear = parseInt(yearEl.value, 10);
+    const count = parseInt(periodEl.value, 10);
+    const months = monthsInPeriod(endYear, endMonth, count);
+    const names = months.map(({ y, m }) => label(y, m));
+
+    if (names.length === 1) {
+      rangeEl.textContent = names[0];
+    } else {
+      rangeEl.textContent = names[0] + " → " + names[names.length - 1];
+    }
+
+    chipsEl.innerHTML = names
+      .map((n) => '<span class="te-tax-preview__chip">' + n + "</span>")
+      .join("");
+  }
+
+  const form = document.getElementById("teTaxReportForm");
+  if (!form) return;
+
+  form.querySelectorAll("select, input[type=radio]").forEach((el) => {
+    el.addEventListener("change", updatePreview);
+  });
+  updatePreview();
+})();
+</script>
+{% endblock %}

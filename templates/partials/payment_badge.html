@@ -1,0 +1,13 @@
+{% with p=status|default:'' %}
+{% if p == "Paid" %}
+<span class="te-badge-status te-badge-status--paid">Paid</span>
+{% elif p == "Partially Paid" %}
+<span class="te-badge-status te-badge-status--partial">Partially Paid</span>
+{% elif p == "Credit" %}
+<span class="te-badge-status te-badge-status--credit">Credit</span>
+{% elif p == "Unpaid" %}
+<span class="te-badge-status te-badge-status--unpaid">Unpaid</span>
+{% else %}
+<span class="te-badge-status te-badge-status--unpaid">{{ p|default:"—" }}</span>
+{% endif %}
+{% endwith %}

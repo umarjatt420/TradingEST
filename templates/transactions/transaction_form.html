@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% load te_labels %}
+{% block title %}{% if object %}Edit{% else %}New{% endif %} transaction · {{ brand_name_en }}{% endblock %}
+{% block header_title %}{% if object %}Edit transaction{% else %}New transaction{% endif %}{% endblock %}
+
+{% block content %}
+<div class="te-page-card mx-auto" style="max-width: 900px;">
+  <form method="post" novalidate id="transaction-form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+    {% endif %}
+    <div class="row g-3">
+      {% for field in form %}
+      <div class="col-md-6{% if field.name == 'category' %} col-12{% endif %}{% if field.name == 'project_reference' or field.name == 'project' %} te-linked-project-field{% endif %}">
+        <label class="form-label te-tx-form-label fw-semibold small text-muted" for="{{ field.id_for_label }}">{{ field.name|tx_label }}</label>
+        {% if field.name == 'category' %}
+        <div class="input-group te-category-input-group flex-nowrap">
+          {{ field }}
+          <button type="button" class="btn te-btn-add-category" id="te-add-category-btn">+ Add category</button>
+          <div class="te-category-add-inline" id="te-category-add-inline" hidden>
+            <input
+              type="text"
+              class="form-control"
+              id="te-category-new-input"
+              placeholder="New category name"
+              maxlength="128"
+              autocomplete="off"
+            >
+            <button type="button" class="btn te-btn-add-category" id="te-category-confirm-btn">Add</button>
+            <button type="button" class="btn te-btn-add-category te-btn-add-category--outline" id="te-category-cancel-btn">Cancel</button>
+          </div>
+        </div>
+        {% else %}
+        {{ field }}
+        {% endif %}
+        {% if field.errors %}<div class="text-danger small">{{ field.errors }}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </div>
+    <p class="text-muted small mt-2 mb-0">Tax amount and total are calculated on save (Business-Logic rules).</p>
+    <div class="mt-4 te-form-actions d-grid d-sm-flex flex-wrap gap-2">
+      <button type="submit" class="btn te-btn-gradient">Save</button>
+      <a href="{% if object %}{% url 'transactions:detail' object.pk %}{% else %}{% url 'transactions:list' %}{% endif %}" class="btn te-btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<script>
+(function () {
+  var refEl = document.getElementById("id_project_reference");
+  var nameEl = document.getElementById("id_project");
+  if (refEl && nameEl) {
+    function sync(from, to) {
+      from.addEventListener("change", function () {
+        to.value = from.value;
+      });
+    }
+    sync(refEl, nameEl);
+    sync(nameEl, refEl);
+  }
+
+  var catEl = document.getElementById("id_category");
+  if (!catEl) return;
+
+  var addBtn = document.getElementById("te-add-category-btn");
+  var inline = document.getElementById("te-category-add-inline");
+  var input = document.getElementById("te-category-new-input");
+  var confirmBtn = document.getElementById("te-category-confirm-btn");
+  var cancelBtn = document.getElementById("te-category-cancel-btn");
+  if (!addBtn || !inline || !input) return;
+
+  function showInlineAdd() {
+    addBtn.hidden = true;
+    inline.hidden = false;
+    input.value = "";
+    input.focus();
+  }
+
+  function hideInlineAdd() {
+    inline.hidden = true;
+    addBtn.hidden = false;
+    input.value = "";
+  }
+
+  function addCategoryOption(name) {
+    for (var i = 0; i < catEl.options.length; i++) {
+      if (catEl.options[i].value === name) {
+        catEl.value = name;
+        return;
+      }
+    }
+    var opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    catEl.appendChild(opt);
+    catEl.value = name;
+  }
+
+  function confirmNewCategory() {
+    var name = input.value.trim().replace(/\s+/g, " ");
+    if (!name) {
+      input.focus();
+      return;
+    }
+    confirmBtn.disabled = true;
+    fetch("{% url 'transactions:category_add' %}", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": document.querySelector("[name=csrfmiddlewaretoken]").value,
+      },
+      body: JSON.stringify({ name: name }),
+    })
+      .then(function (res) {
+        return res.json().then(function (data) {
+          return { ok: res.ok, data: data };
+        });
+      })
+      .then(function (result) {
+        if (!result.ok) {
+          alert(result.data.error || "Could not save category.");
+          return;
+        }
+        addCategoryOption(result.data.name);
+        hideInlineAdd();
+      })
+      .catch(function () {
+        alert("Could not save category. Please try again.");
+      })
+      .finally(function () {
+        confirmBtn.disabled = false;
+      });
+  }
+
+  addBtn.addEventListener("click", showInlineAdd);
+  cancelBtn.addEventListener("click", hideInlineAdd);
+  confirmBtn.addEventListener("click", confirmNewCategory);
+  input.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      confirmNewCategory();
+    } else if (e.key === "Escape") {
+      hideInlineAdd();
+    }
+  });
+})();
+</script>
+{% endblock %}

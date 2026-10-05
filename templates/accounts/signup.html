@@ -1,0 +1,55 @@
+{% extends "auth_base.html" %}
+{% block title %}Create account · {{ brand_name_en }}{% endblock %}
+
+{% block auth_card %}
+<h2 class="h4 mb-3">Create your account</h2>
+
+<form method="post" action="" novalidate>
+  {% csrf_token %}
+  {% if form.non_field_errors %}
+  <div class="alert alert-danger py-2 small mb-3">{{ form.non_field_errors }}</div>
+  {% endif %}
+
+  <div class="te-field-icon-wrap mb-3">
+    <span class="te-field-icon" aria-hidden="true"><i class="bi bi-envelope"></i></span>
+    <div class="form-floating">
+      {{ form.email }}
+      <label for="{{ form.email.id_for_label }}">Email address</label>
+    </div>
+  </div>
+  {% if form.email.errors %}<div class="text-danger small mb-2">{{ form.email.errors }}</div>{% endif %}
+
+  <div class="te-field-icon-wrap mb-3">
+    <span class="te-field-icon" aria-hidden="true"><i class="bi bi-person"></i></span>
+    <div class="form-floating">
+      {{ form.full_name }}
+      <label for="{{ form.full_name.id_for_label }}">Full name</label>
+    </div>
+  </div>
+  {% if form.full_name.errors %}<div class="text-danger small mb-2">{{ form.full_name.errors }}</div>{% endif %}
+
+  <div class="te-field-icon-wrap mb-3">
+    <span class="te-field-icon" aria-hidden="true"><i class="bi bi-lock"></i></span>
+    <div class="form-floating">
+      {{ form.password1 }}
+      <label for="{{ form.password1.id_for_label }}">Password</label>
+    </div>
+  </div>
+  {% if form.password1.errors %}<div class="text-danger small mb-2">{{ form.password1.errors }}</div>{% endif %}
+
+  <div class="te-field-icon-wrap mb-4">
+    <span class="te-field-icon" aria-hidden="true"><i class="bi bi-lock-fill"></i></span>
+    <div class="form-floating">
+      {{ form.password2 }}
+      <label for="{{ form.password2.id_for_label }}">Confirm password</label>
+    </div>
+  </div>
+  {% if form.password2.errors %}<div class="text-danger small mb-3">{{ form.password2.errors }}</div>{% endif %}
+
+  <button type="submit" class="btn te-btn-auth-primary">Create account</button>
+</form>
+{% endblock %}
+
+{% block auth_switch %}
+Already registered? <a href="{% url 'accounts:login' %}">Sign in</a>
+{% endblock %}

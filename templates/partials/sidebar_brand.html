@@ -1,0 +1,16 @@
+{% load static %}
+<a href="{% url 'reports:dashboard' %}" class="te-sidebar-brand">
+  <img
+    src="{% static 'img/logo.png' %}"
+    alt="{{ brand_name_en }}"
+    class="te-sidebar-brand__logo"
+    width="64"
+    height="64"
+    decoding="async"
+  >
+  <div class="te-sidebar-brand__text">
+    <span class="te-sidebar-brand__en">{{ brand_name_en }}</span>
+    <span class="te-sidebar-brand__ar" dir="rtl" lang="ar">{{ brand_name_ar }}</span>
+    <span class="te-sidebar-brand__tagline">{{ brand_tagline }}</span>
+  </div>
+</a>

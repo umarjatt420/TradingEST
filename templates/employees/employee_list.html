@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Employees · {{ brand_name_en }}{% endblock %}
+{% block header_title %}Employees{% endblock %}
+
+{% block content %}
+<div class="te-page-heading-row">
+  <div>
+    <h1>Employees</h1>
+    <p class="text-muted small mb-0">{{ totals.n }} team member(s)</p>
+  </div>
+  {% if user.role == 'admin' or user.role == 'accountant' %}
+  <a class="btn te-btn-gradient" href="{% url 'employees:add' %}"><i class="bi bi-plus-lg me-1"></i> Add employee</a>
+  {% endif %}
+</div>
+
+{% if employees %}
+<div class="te-table-card">
+  <div class="table-responsive">
+    <table class="table table-sm mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Employee Name</th><th>Paid on</th><th>Type (Monthly/Daily)</th><th>Salary Due This Month</th><th>Total Salary Paid This Month</th><th>Pending Salary This Month</th><th>Advance Balance</th><th>Total Pending Salary(All Months)</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in employees %}
+        <tr>
+          <td class="fw-medium">{{ e.name }}</td>
+          <td>{{ e.paid_on|default:"—" }}</td>
+          <td><span class="badge rounded-pill text-bg-light border">{{ e.salary_type }}</span></td>
+          <td>{{ e.salary_due_this_month|sar }}</td>
+          <td>{{ e.salary_paid_this_month|sar }}</td>
+          <td>{{ e.pending_salary_this_month|sar }}</td>
+          <td>{{ e.advance_balance|sar }}</td>
+          <td>{{ e.total_pending_salary_all_months|sar }}</td>
+          <td><a class="btn btn-sm te-btn-secondary" href="{% url 'employees:detail' e.pk %}">Detail</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="te-page-card te-empty-state">
+  <i class="bi bi-people" aria-hidden="true"></i>
+  <p>No employees on file.</p>
+</div>
+{% endif %}
+{% endblock %}

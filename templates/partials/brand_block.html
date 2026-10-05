@@ -1,0 +1,22 @@
+{% load static %}
+<div class="te-brand-block{% if compact %} te-brand-block--compact{% endif %}{% if show_logo %} te-brand-block--with-logo{% endif %}">
+  {% if show_logo %}
+  <img
+    src="{% static 'img/logo.png' %}"
+    alt=""
+    class="te-brand-logo{% if compact %} te-brand-logo--compact{% endif %}{% if logo_large %} te-brand-logo--large{% endif %}"
+    width="{% if logo_large %}160{% elif compact %}40{% else %}120{% endif %}"
+    height="{% if logo_large %}160{% elif compact %}40{% else %}120{% endif %}"
+    decoding="async"
+  >
+  {% endif %}
+  {% if show_text != False %}
+  <div class="te-brand-block__text">
+    <span class="te-brand-block__ar" dir="rtl" lang="ar">{{ brand_name_ar }}</span>
+    <span class="te-brand-block__en">{{ brand_name_en }}</span>
+    {% if show_tagline %}
+    <span class="te-brand-block__tagline">{{ brand_tagline }}</span>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>

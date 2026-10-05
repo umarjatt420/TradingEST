@@ -1,0 +1,16 @@
+{% load static %}
+<div class="te-auth-panel-brand">
+  <img
+    src="{% static 'img/logo.png' %}"
+    alt="{{ brand_name_en }}"
+    class="te-auth-panel-brand__logo"
+    width="400"
+    height="400"
+    decoding="async"
+  >
+  <div class="te-auth-panel-brand__text">
+    <span class="te-auth-panel-brand__en">{{ brand_name_en }}</span>
+    <span class="te-auth-panel-brand__ar" dir="rtl" lang="ar">{{ brand_name_ar }}</span>
+    <span class="te-auth-panel-brand__tagline">{{ brand_tagline }}</span>
+  </div>
+</div>

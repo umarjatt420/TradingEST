@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}{{ employee.name }} · {{ brand_name_en }}{% endblock %}
+{% block header_title %}{{ employee.name }}{% endblock %}
+
+{% block content %}
+<div class="te-page-heading-row">
+  <h1>{{ employee.name }}</h1>
+  <div class="d-flex flex-wrap gap-2">
+    {% if user.role == 'admin' or user.role == 'accountant' %}
+    <a class="btn te-btn-gradient" href="{% url 'employees:edit' employee.pk %}">Edit</a>
+    <a class="btn te-btn-danger" href="{% url 'employees:delete' employee.pk %}">Delete</a>
+    {% endif %}
+    <a class="btn te-btn-secondary" href="{% url 'employees:list' %}">Back</a>
+  </div>
+</div>
+
+<dl class="row te-dl-card">
+  <dt class="col-sm-3">Employee Name</dt><dd class="col-sm-9">{{ employee.name }}</dd>
+  <dt class="col-sm-3">Type (Monthly/Daily)</dt><dd class="col-sm-9">{{ employee.get_salary_type_display }}</dd>
+  <dt class="col-sm-3">Monthly Salary</dt><dd class="col-sm-9">{{ employee.monthly_salary|sar }}</dd>
+  <dt class="col-sm-3">Daily Rate</dt><dd class="col-sm-9">{{ employee.daily_rate|sar }}</dd>
+  <dt class="col-sm-3">Days Worked (This Month)</dt><dd class="col-sm-9">{{ employee.days_worked|num }}</dd>
+  <dt class="col-sm-3">Salary Due This Month</dt><dd class="col-sm-9">{{ employee.salary_due_this_month|sar }}</dd>
+  <dt class="col-sm-3">Total Salary Paid This Month</dt><dd class="col-sm-9">{{ employee.salary_paid_this_month|sar }}</dd>
+  <dt class="col-sm-3">Paid on</dt><dd class="col-sm-9">{{ employee.paid_on|default:"—" }}</dd>
+  <dt class="col-sm-3">Pending Salary This Month</dt><dd class="col-sm-9">{{ employee.pending_salary_this_month|sar }}</dd>
+  <dt class="col-sm-3">Total Advance Taken</dt><dd class="col-sm-9">{{ employee.advance_taken|sar }}</dd>
+  <dt class="col-sm-3">Total Advance Adjusted</dt><dd class="col-sm-9">{{ employee.advance_adjusted|sar }}</dd>
+  <dt class="col-sm-3">Advance Balance</dt><dd class="col-sm-9">{{ employee.advance_balance|sar }}</dd>
+  <dt class="col-sm-3">Previous Pending Salary</dt><dd class="col-sm-9">{{ employee.previous_pending_salary|sar }}</dd>
+  <dt class="col-sm-3">Total Pending Salary(All Months)</dt><dd class="col-sm-9">{{ employee.total_pending_salary_all_months|sar }}</dd>
+  <dt class="col-sm-3">Note</dt><dd class="col-sm-9">{{ employee.note|default:"—"|linebreaks }}</dd>
+</dl>
+{% endblock %}

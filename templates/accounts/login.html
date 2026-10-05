@@ -1,0 +1,36 @@
+{% extends "auth_base.html" %}
+{% block title %}Sign in · {{ brand_name_en }}{% endblock %}
+{% block auth_page_class %} te-auth-page--login{% endblock %}
+
+{% block auth_card %}
+<h2 class="h4 mb-1">Welcome back</h2>
+<p class="text-muted small mb-4">Sign in to continue to your workspace.</p>
+
+<form method="post" action="" novalidate>
+  {% csrf_token %}
+  {% if form.non_field_errors %}
+  <div class="alert alert-danger py-2 small mb-3">{{ form.non_field_errors }}</div>
+  {% endif %}
+
+  <div class="te-field-icon-wrap mb-3">
+    <span class="te-field-icon" aria-hidden="true"><i class="bi bi-envelope"></i></span>
+    <div class="form-floating">
+      {{ form.email }}
+      <label for="{{ form.email.id_for_label }}">Email address</label>
+    </div>
+  </div>
+  <div class="te-field-icon-wrap mb-4">
+    <span class="te-field-icon" aria-hidden="true"><i class="bi bi-lock"></i></span>
+    <div class="form-floating">
+      {{ form.password }}
+      <label for="{{ form.password.id_for_label }}">Password</label>
+    </div>
+  </div>
+
+  <button type="submit" class="btn te-btn-auth-primary">Sign in</button>
+</form>
+{% endblock %}
+
+{% block auth_switch %}
+New here? <a href="{% url 'accounts:signup' %}">Create an account</a>
+{% endblock %}

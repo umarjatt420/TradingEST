@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Accounts summary · {{ brand_name_en }}{% endblock %}
+{% block header_title %}Accounts summary{% endblock %}
+
+{% block content %}
+<div class="te-table-card">
+  <div class="table-responsive">
+    <table class="table mb-0 align-middle">
+      <thead><tr><th>Account</th><th>Total IN</th><th>Total OUT</th><th>Balance</th><th>Basis</th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td class="fw-semibold">{{ r.label }}</td>
+          <td>{{ r.total_in|sar }}</td>
+          <td>{{ r.total_out|sar }}</td>
+          <td><strong class="text-primary">{{ r.balance|sar }}</strong></td>
+          <td class="small text-muted">{{ r.note }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

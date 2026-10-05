@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Projects · {{ brand_name_en }}{% endblock %}
+{% block header_title %}Projects{% endblock %}
+
+{% block content %}
+<div class="te-page-heading-row flex-column flex-sm-row align-items-stretch align-items-sm-center">
+  <h1>Projects</h1>
+  {% if user.role == 'admin' or user.role == 'accountant' %}
+  <a class="btn te-btn-gradient w-100 w-sm-auto" href="{% url 'projects:add' %}"><i class="bi bi-plus-lg me-1"></i> New project</a>
+  {% endif %}
+</div>
+
+<form method="get" class="row g-2 align-items-end mb-4 te-toolbar te-toolbar--filters">
+  <div class="col-12 col-md-8">
+    <label class="form-label small text-muted mb-1 fw-semibold">Search by reference #, name, client…</label>
+    <input class="form-control" type="search" name="q" value="{{ filters.q }}" placeholder="e.g. PRJ-0001">
+  </div>
+  <div class="col-12 col-md-4">
+    <button class="btn te-btn-secondary w-100 mt-md-4" type="submit"><i class="bi bi-funnel me-1"></i> Filter</button>
+  </div>
+</form>
+
+{% if projects %}
+<div class="te-table-card">
+  <div class="table-responsive">
+    <table class="table table-sm mb-0 align-middle">
+      <thead>
+        <tr>
+          <th>Reference #</th><th>Project Name</th><th>Client Name</th><th>Contract Value (Excl. VAT)</th><th>VAT 15%</th><th>Contract Incl. VAT</th><th>Client advance (incl. VAT)</th>
+          <th>Total Income</th><th>Total Expense</th><th>Net Profit / Loss</th><th>Remaining Amount</th><th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in projects %}
+        <tr>
+          <td><code class="small">{{ p.reference_number }}</code></td>
+          <td class="fw-medium">{{ p.name }}</td>
+          <td>{{ p.client_name }}</td>
+          <td>{{ p.contract_value_excl_vat|sar }}</td>
+          <td>{{ p.vat_15|sar }}</td>
+          <td>{{ p.contract_incl_vat|sar }}</td>
+          <td>{{ p.client_advance_display|default:"—" }}</td>
+          <td>{{ p.total_income_paid|default:0|sar }}</td>
+          <td>{{ p.total_expense|default:0|sar }}</td>
+          <td>{{ p.net_profit_line|sar }}</td>
+          <td>{{ p.remaining_display|sar }}</td>
+          <td><a class="btn btn-sm te-btn-secondary" href="{% url 'projects:detail_by_ref' p.reference_number %}">Detail</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+<p class="text-muted small mt-3 mb-0">Net Profit / Loss = Contract Value (Excl. VAT) − Total Expense. Remaining Amount = Contract Incl. VAT − Total Income (paid IN, total amount).</p>
+{% else %}
+<div class="te-page-card te-empty-state">
+  <i class="bi bi-kanban" aria-hidden="true"></i>
+  <p>No projects match your search. {% if user.role == 'admin' or user.role == 'accountant' %}Create one to get started.{% endif %}</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,114 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ brand_name_en }}{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&family=Noto+Sans+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="icon" href="{% static 'favicon.ico' %}" sizes="any">
+  <link rel="icon" href="{% static 'favicon-32.png' %}" type="image/png" sizes="32x32">
+  <link rel="icon" href="{% static 'favicon-16.png' %}" type="image/png" sizes="16x16">
+  <link rel="apple-touch-icon" href="{% static 'favicon-180.png' %}" sizes="180x180">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body class="te-app-body">
+<div class="te-app-layout">
+  <div class="te-app-main">
+    <header class="te-topbar">
+      <!-- Mobile / xs–sm: brand bar -->
+      <div class="te-topbar-mobile d-flex d-md-none align-items-center w-100 gap-2">
+        <button type="button" class="te-sidebar-toggle te-sidebar-toggle--touch" data-te-sidebar-open aria-label="Open navigation menu">
+          <i class="bi bi-list fs-4" aria-hidden="true"></i>
+        </button>
+        <div class="flex-grow-1 text-center min-w-0 px-1">
+          <span class="te-topbar-brand d-flex align-items-center justify-content-center gap-2 min-w-0">
+            <img src="{% static 'img/logo.png' %}" alt="" class="te-topbar-logo" width="28" height="28" decoding="async">
+            <span class="text-truncate">{{ brand_name_en }}</span>
+          </span>
+        </div>
+        {% if user.is_authenticated %}
+        <div class="d-flex align-items-center gap-2 flex-shrink-0">
+          {% if user.role == 'admin' %}
+          <span class="badge rounded-pill badge-role-admin">{{ user.get_role_display }}</span>
+          {% elif user.role == 'accountant' %}
+          <span class="badge rounded-pill badge-role-accountant">{{ user.get_role_display }}</span>
+          {% else %}
+          <span class="badge rounded-pill badge-role-viewer">{{ user.get_role_display }}</span>
+          {% endif %}
+          <form action="{% url 'accounts:logout' %}" method="post" class="d-inline mb-0">
+            {% csrf_token %}
+            <button type="submit" class="btn te-btn-logout te-btn-logout--icon d-sm-none" aria-label="Logout"><i class="bi bi-box-arrow-right"></i></button>
+            <button type="submit" class="btn btn-sm te-btn-logout d-none d-sm-inline-block">Logout</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- md+: page title + actions -->
+      <div class="te-topbar-desktop d-none d-md-flex w-100 align-items-center justify-content-between gap-3 min-w-0">
+        <h1 class="te-topbar-title text-truncate mb-0 flex-grow-1 min-w-0">{% block header_title %}Dashboard{% endblock %}</h1>
+        {% if user.is_authenticated %}
+        <div class="te-topbar-actions flex-shrink-0">
+          <span class="te-topbar-user d-none d-lg-inline">{{ user.display_name }}</span>
+          {% if user.role == 'admin' %}
+          <span class="badge rounded-pill badge-role-admin">{{ user.get_role_display }}</span>
+          {% elif user.role == 'accountant' %}
+          <span class="badge rounded-pill badge-role-accountant">{{ user.get_role_display }}</span>
+          {% else %}
+          <span class="badge rounded-pill badge-role-viewer">{{ user.get_role_display }}</span>
+          {% endif %}
+          <form action="{% url 'accounts:logout' %}" method="post" class="d-inline mb-0">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm te-btn-logout">Logout</button>
+          </form>
+        </div>
+        {% endif %}
+      </div>
+    </header>
+
+    <div class="te-content-wrap">
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm border-0" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+        {% endfor %}
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+
+  <!-- Backdrop + sidebar after main so fixed stacking order: content < overlay < drawer -->
+  <div id="teSidebarBackdrop" class="te-sidebar-backdrop" aria-hidden="true" tabindex="-1"></div>
+
+  <aside id="teSidebar" class="te-sidebar" aria-label="Main navigation">
+    <div class="te-sidebar-head">
+      <div class="te-sidebar-logo">
+        {% include "partials/sidebar_brand.html" %}
+      </div>
+      <button type="button" class="te-sidebar-expand d-none d-md-inline-flex d-lg-none" id="teSidebarExpandBtn" aria-label="Expand or collapse sidebar" title="Expand menu">
+        <i class="bi bi-chevron-right te-sidebar-expand-icon" aria-hidden="true"></i>
+      </button>
+      <button type="button" class="te-sidebar-mobile-close d-md-none" id="teSidebarCloseBtn" aria-label="Close menu">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="te-sidebar-nav">
+      {% include "partials/sidebar_nav.html" %}
+    </div>
+  </aside>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"></script>
+<script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

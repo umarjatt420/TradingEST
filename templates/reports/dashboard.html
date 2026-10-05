@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · {{ brand_name_en }}{% endblock %}
+{% block header_title %}Dashboard{% endblock %}
+
+{% block content %}
+{% if show_full_financial_dashboard %}
+<form method="get" class="row g-2 align-items-end mb-4 te-toolbar te-toolbar--filters">
+  <div class="col-12 col-sm-auto">
+    <label class="form-label small mb-0 text-muted fw-semibold">VAT period (month)</label>
+    <select class="form-select" name="month" aria-label="VAT period month">
+      {% for num, name in calendar_months %}
+      <option value="{{ num }}" {% if month == num %}selected{% endif %}>{{ name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-12 col-sm-auto">
+    <label class="form-label small mb-0 text-muted fw-semibold">Year</label>
+    <input class="form-control" type="number" name="year" value="{{ year }}">
+  </div>
+  <div class="col-12 col-sm-auto"><button type="submit" class="btn te-btn-gradient w-100 w-sm-auto"><i class="bi bi-funnel me-1"></i>Apply</button></div>
+</form>
+{% endif %}
+
+<div class="row g-3 te-kpi-grid">
+  <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+    <div class="te-kpi-card te-kpi--cash">
+      <span class="te-kpi-card__icon-wrap" aria-hidden="true"><i class="bi bi-cash-stack te-kpi-card__icon"></i></span>
+      <div class="te-kpi-card__label">Cash balance</div>
+      <div class="te-kpi-card__value">{{ metrics.cash_balance|sar }}</div>
+    </div>
+  </div>
+  <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+    <div class="te-kpi-card te-kpi--bank">
+      <span class="te-kpi-card__icon-wrap" aria-hidden="true"><i class="bi bi-bank te-kpi-card__icon"></i></span>
+      <div class="te-kpi-card__label">Bank balance</div>
+      <div class="te-kpi-card__value">{{ metrics.bank_balance|sar }}</div>
+    </div>
+  </div>
+  <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+    <div class="te-kpi-card te-kpi--ar">
+      <span class="te-kpi-card__icon-wrap" aria-hidden="true"><i class="bi bi-arrow-down-circle te-kpi-card__icon"></i></span>
+      <div class="te-kpi-card__label">Accounts receivable</div>
+      <div class="te-kpi-card__value">{{ metrics.accounts_receivable|sar }}</div>
+    </div>
+  </div>
+  <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+    <div class="te-kpi-card te-kpi--ap">
+      <span class="te-kpi-card__icon-wrap" aria-hidden="true"><i class="bi bi-arrow-up-circle te-kpi-card__icon"></i></span>
+      <div class="te-kpi-card__label">Accounts payable</div>
+      <div class="te-kpi-card__value">{{ metrics.accounts_payable|sar }}</div>
+    </div>
+  </div>
+
+  {% if show_full_financial_dashboard %}
+  <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+    <div class="te-kpi-card te-kpi--owner">
+      <span class="te-kpi-card__icon-wrap" aria-hidden="true"><i class="bi bi-person-badge te-kpi-card__icon"></i></span>
+      <div class="te-kpi-card__label">Owner net (contribution − drawings)</div>
+      <div class="te-kpi-card__value">{{ metrics.owner_net_drawings|sar }}</div>
+    </div>
+  </div>
+  <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+    <div class="te-kpi-card te-kpi--employee">
+      <span class="te-kpi-card__icon-wrap" aria-hidden="true"><i class="bi bi-wallet2 te-kpi-card__icon"></i></span>
+      <div class="te-kpi-card__label">Employee payable</div>
+      <div class="te-kpi-card__value">{{ metrics.employee_payable|sar }}</div>
+    </div>
+  </div>
+  <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+    <div class="te-kpi-card te-kpi--employee">
+      <span class="te-kpi-card__icon-wrap" aria-hidden="true"><i class="bi bi-piggy-bank te-kpi-card__icon"></i></span>
+      <div class="te-kpi-card__label">Employee advance</div>
+      <div class="te-kpi-card__value">{{ metrics.employee_advance|sar }}</div>
+    </div>
+  </div>
+  <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+    <div class="te-kpi-card te-kpi--profit">
+      <span class="te-kpi-card__icon-wrap" aria-hidden="true"><i class="bi bi-graph-up-arrow te-kpi-card__icon"></i></span>
+      <div class="te-kpi-card__label">Total net profit (all projects)</div>
+      <div class="te-kpi-card__value">{{ metrics.total_net_profit_projects|sar }}</div>
+    </div>
+  </div>
+  <div class="col-12 col-sm-6 col-lg-4 col-xl-3">
+    <div class="te-kpi-card te-kpi--vat">
+      <span class="te-kpi-card__icon-wrap" aria-hidden="true"><i class="bi bi-percent te-kpi-card__icon"></i></span>
+      <div class="te-kpi-card__label">Net VAT payable</div>
+      <div class="te-kpi-card__value">{{ metrics.net_vat_payable|sar }}</div>
+      <p class="small mb-0 mt-2" style="color: var(--te-muted);">Period: {{ metrics.vat_period_label }}</p>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+{% if show_admin_shortcuts %}
+<div class="te-page-card mt-4">
+  <div class="small fw-semibold text-uppercase mb-3" style="letter-spacing: 0.06em; color: var(--te-muted);">Administration</div>
+  <a class="btn btn-dark rounded-lg px-4 w-100 w-md-auto" href="{% url 'accounts:user_list' %}"><i class="bi bi-people me-2"></i>Manage users</a>
+</div>
+{% endif %}
+{% endblock %}

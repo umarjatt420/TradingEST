@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Legacy payables · {{ brand_name_en }}{% endblock %}
+{% block header_title %}Legacy accounts payable{% endblock %}
+
+{% block content %}
+<div class="te-page-heading-row">
+  <h1>Legacy accounts payable</h1>
+  {% if user.role == 'admin' or user.role == 'accountant' %}
+  <a class="btn te-btn-gradient" href="{% url 'transactions:legacy_add' %}"><i class="bi bi-plus-lg me-1"></i> Add row</a>
+  {% endif %}
+</div>
+
+{% if legacy_rows %}
+<div class="te-table-card">
+  <div class="table-responsive">
+    <table class="table mb-0 align-middle">
+      <thead>
+        <tr><th>Suppliars Names</th><th>Total payable</th><th>Paid date</th><th>Total paid</th><th>Total Remain after Paid</th><th>Projects Name</th><th>Note</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for row in legacy_rows %}
+        <tr>
+          <td class="fw-medium">{{ row.supplier_name }}</td>
+          <td>{{ row.total_payable|sar }}</td>
+          <td>{% if row.date_last_paid %}{{ row.date_last_paid|date:"j M Y" }}{% else %}—{% endif %}</td>
+          <td>{{ row.total_paid|sar }}</td>
+          <td><strong class="text-primary">{{ row.remaining_calc|sar }}</strong></td>
+          <td>{{ row.projects_name }}</td>
+          <td class="small">{{ row.status_note }}</td>
+          <td>
+            {% if user.role == 'admin' or user.role == 'accountant' %}
+            <a class="btn btn-sm te-btn-secondary me-1" href="{% url 'transactions:legacy_edit' row.pk %}">Edit</a>
+            <a class="btn btn-sm te-btn-danger" href="{% url 'transactions:legacy_delete' row.pk %}">Delete</a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% else %}
+<div class="te-page-card te-empty-state">
+  <i class="bi bi-archive" aria-hidden="true"></i>
+  <p>No legacy payable rows.</p>
+</div>
+{% endif %}
+{% endblock %}

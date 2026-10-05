@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load te_labels %}
+{% block title %}Transaction · {{ brand_name_en }}{% endblock %}
+{% block header_title %}Transaction{% endblock %}
+
+{% block content %}
+<div class="te-page-heading-row">
+  <h1>Transaction</h1>
+  <div class="d-flex flex-wrap gap-2">
+    {% if user.role == 'admin' or user.role == 'accountant' %}
+    <a class="btn te-btn-gradient" href="{% url 'transactions:edit' transaction.pk %}">Edit</a>
+    <a class="btn te-btn-danger" href="{% url 'transactions:delete' transaction.pk %}">Delete</a>
+    {% endif %}
+    <a class="btn te-btn-secondary" href="{% url 'transactions:list' %}">Back</a>
+  </div>
+</div>
+
+<dl class="row te-dl-card">
+  <dt class="col-sm-3">{% tx_label_tag "project_reference" %}</dt><dd class="col-sm-9">{% if transaction.project %}<code>{{ transaction.project.reference_number }}</code>{% else %}—{% endif %}</dd>
+  <dt class="col-sm-3">{% tx_label_tag "project" %}</dt><dd class="col-sm-9">{% if transaction.project %}{{ transaction.project.name }}{% else %}—{% endif %}</dd>
+  <dt class="col-sm-3">{% tx_label_tag "date" %}</dt><dd class="col-sm-9">{{ transaction.date }}</dd>
+  <dt class="col-sm-3">{% tx_label_tag "description" %}</dt><dd class="col-sm-9">{{ transaction.description|default:"—" }}</dd>
+  <dt class="col-sm-3">{% tx_label_tag "flow_type" %}</dt><dd class="col-sm-9">{% include "partials/flow_badge.html" with flow=transaction.flow_type %}</dd>
+  <dt class="col-sm-3">{% tx_label_tag "amount_excl_vat" %}</dt><dd class="col-sm-9">{{ transaction.amount_excl_vat|sar }}</dd>
+  <dt class="col-sm-3">{% tx_label_tag "account" %}</dt><dd class="col-sm-9">{{ transaction.account }}</dd>
+  <dt class="col-sm-3">{% tx_label_tag "category" %}</dt><dd class="col-sm-9">{{ transaction.category }}</dd>
+  <dt class="col-sm-3">{% tx_label_tag "qty" %}</dt><dd class="col-sm-9">{{ transaction.qty|num }}</dd>
+  <dt class="col-sm-3">{% tx_label_tag "rate" %}</dt><dd class="col-sm-9">{{ transaction.rate|num }}</dd>
+  <dt class="col-sm-3">{% tx_label_tag "party_name" %}</dt><dd class="col-sm-9">{{ transaction.party_name|default:"—" }}</dd>
+  <dt class="col-sm-3">{% tx_label_tag "party_type" %}</dt><dd class="col-sm-9">{{ transaction.party_type|default:"—" }}</dd>
+  <dt class="col-sm-3">{% tx_label_tag "invoice_number" %}</dt><dd class="col-sm-9">{{ transaction.invoice_number|default:"—" }}</dd>
+  <dt class="col-sm-3">{% tx_label_tag "tax_percent" %}</dt><dd class="col-sm-9">{{ transaction.tax_percent|num }}</dd>
+  <dt class="col-sm-3">{% tx_label_tag "tax_amount" %}</dt><dd class="col-sm-9">{{ transaction.tax_amount|sar }}</dd>
+  <dt class="col-sm-3">{% tx_label_tag "total_amount" %}</dt><dd class="col-sm-9">{{ transaction.total_amount|sar }}</dd>
+  <dt class="col-sm-3">{% tx_label_tag "payment_status" %}</dt><dd class="col-sm-9">{% include "partials/payment_badge.html" with status=transaction.payment_status %}</dd>
+  <dt class="col-sm-3">{% tx_label_tag "notes" %}</dt><dd class="col-sm-9">{{ transaction.notes|default:"—" }}</dd>
+</dl>
+<p class="text-muted small mb-0">Tax amount and total are calculated on save (Business-Logic rules).</p>
+{% endblock %}

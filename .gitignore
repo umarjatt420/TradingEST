@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+.env
+.env.*
+
+# Django
+media/
+staticfiles/
+*.log
+
+# Test/coverage caches
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Linters / formatters caches
+.ruff_cache/
+.mypy_cache/
+
+# IDE/editor
+.idea/
+.vscode/
+

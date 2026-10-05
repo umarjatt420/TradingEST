@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Monthly report · {{ brand_name_en }}{% endblock %}
+{% block header_title %}Monthly report{% endblock %}
+
+{% block content %}
+<p class="text-muted small mb-4">Cash basis · expense breakdown</p>
+
+<form method="get" class="row g-2 align-items-end mb-4 te-toolbar te-toolbar--filters">
+  <div class="col-12 col-md-auto">
+    <label class="form-label small mb-0 text-muted fw-semibold">Month</label>
+    <select class="form-select" name="month" aria-label="Month">
+      {% for num, name in calendar_months %}
+      <option value="{{ num }}" {% if month == num %}selected{% endif %}>{{ name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-12 col-md-auto">
+    <label class="form-label small mb-0 text-muted fw-semibold">Year</label>
+    <input class="form-control" type="number" name="year" min="2000" max="2100" value="{{ year }}" placeholder="e.g. 2023" aria-label="Year">
+  </div>
+  <div class="col-12 col-md-auto">
+    <button type="submit" class="btn te-btn-gradient w-100 w-md-auto">Generate Report</button>
+  </div>
+  <div class="col-12 col-md-auto">
+    <button type="submit" name="export" value="excel" class="btn btn-success te-btn-success w-100 w-md-auto"><i class="bi bi-file-earmark-excel me-1"></i> Export</button>
+  </div>
+</form>
+
+<div class="te-page-heading-row mb-3">
+  <h1 class="h5 mb-0">{{ month_name }} {{ year }}</h1>
+</div>
+
+<div class="te-table-card te-page-card--flush mb-4">
+  <div class="table-responsive">
+    <table class="table mb-0 align-middle">
+      <tbody>
+        <tr><th style="width: 45%">Total Income (Excl. VAT)</th><td>{{ report.total_income_excl_vat|sar }}</td></tr>
+        <tr><th>Total Expense (Excl. VAT)</th><td>{{ report.total_expense_excl_vat|sar }}</td></tr>
+        <tr class="te-row-emphasis"><th>Net Profit / Loss</th><td><strong>{{ report.net_profit_loss|sar }}</strong></td></tr>
+        <tr><th>Credit Sale</th><td>{{ report.credit_sale|sar }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<h2 class="h6 text-muted text-uppercase fw-bold mb-3">Expense breakdown (Cash OUT)</h2>
+<div class="te-table-card te-page-card--flush">
+  <div class="table-responsive">
+    <table class="table table-sm mb-0 align-middle">
+      <thead><tr><th>Category</th><th>Amount (Excl. VAT)</th></tr></thead>
+      <tbody>
+        <tr><td>Material Purchase</td><td>{{ report.material_expense|sar }}</td></tr>
+        <tr><td>Food Expense</td><td>{{ report.food_expense|sar }}</td></tr>
+        <tr><td>Fuel Expense</td><td>{{ report.fuel_expense|sar }}</td></tr>
+        <tr><td>Labour Expense</td><td>{{ report.labour_expense|sar }}</td></tr>
+        <tr><td>Transport Expense</td><td>{{ report.transport_expense|sar }}</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,44 @@
+{% with ns=request.resolver_match.namespace n=request.resolver_match.url_name %}
+<nav class="nav flex-column te-sidebar-nav-inner">
+  <a class="nav-link {% if ns == 'reports' and n == 'dashboard' %}active{% endif %}" href="{% url 'reports:dashboard' %}" title="Dashboard">
+    <i class="bi bi-speedometer2" aria-hidden="true"></i>
+    <span class="te-nav-label">Dashboard</span>
+  </a>
+  <a class="nav-link {% if ns == 'transactions' and n != 'legacy_list' and n != 'legacy_add' and n != 'legacy_edit' and n != 'legacy_delete' %}active{% endif %}" href="{% url 'transactions:list' %}" title="Transactions">
+    <i class="bi bi-journal-text" aria-hidden="true"></i>
+    <span class="te-nav-label">Transactions</span>
+  </a>
+  <a class="nav-link {% if ns == 'projects' %}active{% endif %}" href="{% url 'projects:list' %}" title="Projects">
+    <i class="bi bi-kanban" aria-hidden="true"></i>
+    <span class="te-nav-label">Projects</span>
+  </a>
+  {% if user.role == 'accountant' or user.role == 'admin' %}
+  <a class="nav-link {% if ns == 'reports' and n == 'accounts_summary' %}active{% endif %}" href="{% url 'reports:accounts_summary' %}" title="Accounts summary">
+    <i class="bi bi-collection" aria-hidden="true"></i>
+    <span class="te-nav-label">Accounts summary</span>
+  </a>
+  <a class="nav-link {% if ns == 'reports' and n == 'tax_report' %}active{% endif %}" href="{% url 'reports:tax_report' %}" title="Tax report">
+    <i class="bi bi-percent" aria-hidden="true"></i>
+    <span class="te-nav-label">Tax report</span>
+  </a>
+  <a class="nav-link {% if ns == 'reports' and n == 'monthly_report' %}active{% endif %}" href="{% url 'reports:monthly_report' %}" title="Monthly report">
+    <i class="bi bi-calendar3" aria-hidden="true"></i>
+    <span class="te-nav-label">Monthly report</span>
+  </a>
+  <a class="nav-link {% if ns == 'employees' %}active{% endif %}" href="{% url 'employees:list' %}" title="Employees">
+    <i class="bi bi-people" aria-hidden="true"></i>
+    <span class="te-nav-label">Employees</span>
+  </a>
+  <a class="nav-link {% if n == 'legacy_list' or n == 'legacy_add' or n == 'legacy_edit' or n == 'legacy_delete' %}active{% endif %}" href="{% url 'transactions:legacy_list' %}" title="Legacy payables">
+    <i class="bi bi-archive" aria-hidden="true"></i>
+    <span class="te-nav-label">Legacy payables</span>
+  </a>
+  {% endif %}
+  {% if user.role == 'admin' %}
+  <a class="nav-link {% if ns == 'accounts' and n == 'user_list' or ns == 'accounts' and n == 'user_add' or ns == 'accounts' and n == 'user_edit' %}active{% endif %}" href="{% url 'accounts:user_list' %}" title="Users">
+    <i class="bi bi-person-gear" aria-hidden="true"></i>
+    <span class="te-nav-label">Users</span>
+  </a>
+  {% endif %}
+</nav>
+{% endwith %}
